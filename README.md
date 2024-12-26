@@ -1,2 +1,1 @@
-# Simulate-a-Supercomputer-Using-a-Linux-Cluster
-This is a Module 4 for HPC Ignite Project
+# โมดูล 3 สร้างซูเปอร์คอมพิวเตอร์จำลองจากลินุกซ์คลัสเตอร์
