@@ -1,0 +1,28 @@
+- hosts: all
+  gather_facts: false
+
+  vars:
+  - IPA_DOMAIN: pbs.toy
+  - TORQUE_SERVER: torque.{{ IPA_DOMAIN }}
+
+  tasks:
+  - copy: src=/root/.ssh/id_ecdsa dest=/root/.ssh mode=600
+
+  - yum: name=munge
+  - command: cp --archive --remove-destination /home/munge/munge.key /etc/munge
+  - systemd: enabled=yes state=started name=munge
+
+  - yum: name=torque,torque-client
+  - copy: dest=/etc/torque/server_name content={{ TORQUE_SERVER }}
+  - systemd: enabled=yes state=started name=trqauthd
+
+  - command: qmgr -c ' print server '
+  - command: qmgr -c ' set server default_queue = b '
+  - command: qmgr -c ' create queue b '
+  - command: qmgr -c ' set queue b queue_type = Execution '
+  - command: qmgr -c ' set queue b enabled=true '
+  - command: qmgr -c ' set server submit_hosts = login.{{ IPA_DOMAIN }} '
+  - command: qmgr -c ' set queue b started=true '
+  - command: qmgr -c ' set server scheduling=true '
+  - command: qmgr -c ' print server '
+  

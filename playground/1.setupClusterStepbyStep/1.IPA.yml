@@ -1,0 +1,44 @@
+- hosts: localhost
+  gather_facts: false
+
+  vars:
+  - REALM: PBS.TOY
+  - IPA_DOMAIN: pbs.toy
+  - SUBNET_PREFIX: 10.20.25
+  - INTERFACE_NAME: podman-pbs-toy
+
+  tasks:
+
+  - name: Create internal podman network for domain "{{ IPA_DOMAIN }}"
+    containers.podman.podman_network:
+      name: podman.{{ IPA_DOMAIN }}
+      recreate: true
+      force: true
+      ipv6: true
+      interface_name: "{{ INTERFACE_NAME }}"
+      subnet: "{{ SUBNET_PREFIX }}.0/24"
+      gateway: "{{ SUBNET_PREFIX }}.254"
+
+  - file: state=absent path=/data/volume/{{ IPA_DOMAIN }}
+  - file: state=directory path=/data/volume/{{ IPA_DOMAIN }}/freeipa
+
+  - name: Create FreeIPA podman container for domain "{{ IPA_DOMAIN }}"
+    containers.podman.podman_container:
+      name: "ipa.{{ IPA_DOMAIN }}"
+      recreate: true
+      rm: false
+      tty: true
+      interactive: true
+      detach: true
+      network: "podman.{{ IPA_DOMAIN }}"
+      ip: "{{SUBNET_PREFIX}}.253"
+      hostname: "ipa.{{ IPA_DOMAIN }}"
+      volume:
+        - /data/volume/{{ IPA_DOMAIN }}/freeipa:/data
+      image: docker.io/freeipa/freeipa-server:fedora-40
+      command: --unattended --ds-password=dsdsdsds --admin-password=adadadad --realm={{ REALM }} --domain {{ IPA_DOMAIN }} --setup-dns --allow-zone-overlap --auto-reverse --forwarder 223.5.5.5 --forwarder 223.6.6.6
+      generate_systemd:
+        path: /tmp/
+        new: true
+        container_prefix: freeipa
+

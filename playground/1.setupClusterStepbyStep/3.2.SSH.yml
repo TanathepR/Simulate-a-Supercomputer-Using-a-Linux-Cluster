@@ -1,0 +1,19 @@
+- hosts: all
+  gather_facts: false
+
+  handlers:
+  - systemd: state=restarted name=sshd
+    name: restart_sshd
+
+  tasks:
+  - yum: name=openssh-server,openssh-clients
+
+  - lineinfile: state=present path=/etc/ssh/ssh_config.d/00-enterpriselinux.conf line='StrictHostKeyChecking no' create=true
+  - lineinfile: state=present path=/etc/ssh/sshd_config.d/00-enterpriselinux.conf line='PermitRootLogin prohibit-password' create=true
+  - lineinfile: state=present path=/etc/ssh/sshd_config.d/00-enterpriselinux.conf line='PasswordAuthentication no' create=true
+    notify: restart_sshd
+
+  - authorized_key: user=root state=present key="{{ item }}"
+    with_items:
+    - "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIXMEgrETPxr17AdWo3YSLLqiRlHC9hQ2+dfuJeR+imEUtSl0KUuW5KuhwUjNV78ZH4kywciapCRgziKeqKkTds="
+    - "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBlpC4ImvIS6NryioaSB1gdHbCkYbV1AOv3FmhS1I/PFeplxl6dzdo8sddeuOOf6av+rPl5erCFsTExCs2h5kS8= root@i.10042008.xyz"

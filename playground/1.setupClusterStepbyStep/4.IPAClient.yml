@@ -1,0 +1,32 @@
+- hosts: all
+  gather_facts: false
+
+  vars:
+  - IPA_DOMAIN: pbs.toy
+  - SUBNET_PREFIX: 10.20.25
+
+  tasks:
+  - yum: name=ipa-client,systemd-timesyncd,nscd
+
+  - shell: echo search {{ IPA_DOMAIN }} > /etc/resolv.conf
+  - shell: echo nameserver {{ SUBNET_PREFIX }}.253 >> /etc/resolv.conf
+
+  - command: ipa-client-install --uninstall --unattended 
+    ignore_errors: true
+
+  - shell: |
+      ipa-client-install \
+      --mkhomedir \
+      --ip-address=$(ip route get {{ SUBNET_PREFIX }}.0 | awk '/dev/{print $5}') \
+      --no-ntp --unattended \
+      --principal admin \
+      --password adadadad \
+      --domain "{{ IPA_DOMAIN }}" \
+      --server="ipa.{{ IPA_DOMAIN }}" \
+      --no-nisdomain \
+      --force-join \
+      --verbose
+
+  - systemd: enabled=yes state=started name=sssd
+#--all-ip-addresses \
+#--enable-dns-updates \

@@ -1,0 +1,21 @@
+- hosts: all
+  gather_facts: false
+
+  tasks:
+  - yum_repository: gpgcheck=no enabled=yes baseurl={{ item.baseurl }} name={{ item.name }} description={{ item.name }}
+    with_items: '{{ enabled_repos }}'
+  - yum_repository: gpgcheck=no enabled=no baseurl={{ item.baseurl }} name={{ item.name }} description={{ item.name }}
+    with_items: '{{ disabled_repos }}'
+
+  vars:
+  - repo_info:
+      el:
+        url: http://av8d:8000
+  - enabled_repos:
+    - baseurl: "{{ repo_info['el']['url'] }}/epel/8/Everything/x86_64"
+      name: EL8epelEverything
+    - baseurl: "{{ repo_info['el']['url'] }}/epel/7/x86_64"
+      name: EL7epel
+  - disabled_repos:
+    - baseurl: "{{ repo_info['el']['url'] }}/kubernetes/yum/repos/kubernetes-el7-x86_64"
+      name: ELKubernetes

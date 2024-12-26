@@ -1,0 +1,297 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+  - file: path=/tmp/reposync.sh state=absent
+  - shell: |
+      echo podman run \
+      --rm --tty --interactive \
+      --volume {{ item.local_root }}:/reposync \
+      reposync \
+      reposync \
+      --download-metadata \
+      {{ item.delete }} \
+      {{ item.newest }} \
+      --repoid={{ item.repo_id }} \
+      --repofrompath={{ item.repo_id }},{{ item.remote_site }}/{{ item.remote_loc }}/{{ item.repo_id }} \
+      --download-path=/reposync/{{ item.local_loc }} | tee -a /tmp/reposync.sh
+    with_items: '{{ repos }}'
+
+  vars:
+  - JLU: https://mirrors.jlu.edu.cn
+  - THU: https://mirrors.tuna.tsinghua.edu.cn
+  - ALI: https://mirrors.aliyun.com
+  - DOCKER: https://download.docker.com
+  - NVIDIA: https://developer.download.nvidia.com
+  - NVIDIA_GITHUB: https://nvidia.github.io
+  - LOCAL_ROOT: /root/fileserver/localrepos
+  - D: --delete
+  - N: --newest
+  - X: x86_64
+  - repos:
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ DOCKER }}"
+      remote_loc: linux/centos/7/x86_64
+      local_loc: docker-ce/linux/centos/9/x86_64
+      repo_id: stable
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ DOCKER }}"
+      remote_loc: linux/centos/7/x86_64
+      local_loc: docker-ce/linux/centos/8/x86_64
+      repo_id: stable
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ DOCKER }}"
+      remote_loc: linux/centos/7/x86_64
+      local_loc: docker-ce/linux/centos/7/x86_64
+      repo_id: stable
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ NVIDIA_GITHUB }}"
+      remote_loc: libnvidia-container/stable/centos7
+      local_loc: libnvidia-container/stable/centos7
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest:
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ NVIDIA_GITHUB }}"
+      remote_loc: libnvidia-container/stable/centos8
+      local_loc: libnvidia-container/stable/centos8
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest:
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ NVIDIA_GITHUB }}"
+      remote_loc: libnvidia-container/stable/rpm
+      local_loc: libnvidia-container/stable/rpm
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest:
+
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ ALI }}"
+      remote_loc: kubernetes/yum/repos
+      local_loc: kubernetes/yum/repos
+      repo_id: kubernetes-el7-x86_64
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ NVIDIA }}"
+      remote_loc: compute/cuda/repos/rhel9
+      local_loc: compute/cuda/repos/rhel9
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ NVIDIA }}"
+      remote_loc: compute/cuda/repos/rhel8
+      local_loc: compute/cuda/repos/rhel8
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ NVIDIA }}"
+      remote_loc: compute/cuda/repos/rhel7
+      local_loc: compute/cuda/repos/rhel7
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ JLU }}"
+      remote_loc: rocky/9/HighAvailability/x86_64
+      local_loc: rocky/9/HighAvailability/x86_64
+      repo_id: os
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ JLU }}"
+      remote_loc: rocky/9/HighAvailability/x86_64
+      local_loc: rocky/9/HighAvailability/x86_64
+      repo_id: kickstart
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ JLU }}"
+      remote_loc: rocky/9/CRB/x86_64
+      local_loc: rocky/9/CRB/x86_64
+      repo_id: os
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ JLU }}"
+      remote_loc: rocky/9/CRB/x86_64
+      local_loc: rocky/9/CRB/x86_64
+      repo_id: kickstart
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: epel/9/Everything
+      local_loc: epel/9/Everything
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: elrepo/elrepo/el9
+      local_loc: elrepo/elrepo/el9
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ JLU }}"
+      remote_loc: rocky/8/HighAvailability/x86_64
+      local_loc: rocky/8/HighAvailability/x86_64
+      repo_id: os
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ JLU }}"
+      remote_loc: rocky/8/HighAvailability/x86_64
+      local_loc: rocky/8/HighAvailability/x86_64
+      repo_id: kickstart
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ JLU }}"
+      remote_loc: rocky/8/PowerTools/x86_64
+      local_loc: rocky/8/PowerTools/x86_64
+      repo_id: os
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ JLU }}"
+      remote_loc: rocky/8/PowerTools/x86_64
+      local_loc: rocky/8/PowerTools/x86_64
+      repo_id: kickstart
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: epel/8/Everything
+      local_loc: epel/8/Everything
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: epel/8/Modular
+      local_loc: epel/8/Modular
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: elrepo/elrepo/el8
+      local_loc: elrepo/elrepo/el8 
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: centos-vault/7.0.1406/updates
+      local_loc: centos-vault/7.0.1406/updates
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: centos-vault/7.1.1503/updates
+      local_loc: centos-vault/7.1.1503/updates
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: centos-vault/7.2.1511/updates
+      local_loc: centos-vault/7.2.1511/updates
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: centos-vault/7.3.1611/updates
+      local_loc: centos-vault/7.3.1611/updates
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: centos-vault/7.4.1708/updates
+      local_loc: centos-vault/7.4.1708/updates
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: centos-vault/7.5.1804/updates
+      local_loc: centos-vault/7.5.1804/updates
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: centos-vault/7.6.1810/updates
+      local_loc: centos-vault/7.6.1810/updates
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: centos-vault/7.7.1908/updates
+      local_loc: centos-vault/7.7.1908/updates
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: centos-vault/7.8.2003/updates
+      local_loc: centos-vault/7.8.2003/updates
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: centos-vault/7.9.2009/updates
+      local_loc: centos-vault/7.9.2009/updates
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: centos/7/updates
+      local_loc: centos/7/updates
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: centos/7/extras
+      local_loc: centos/7/extras
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: epel/7
+      local_loc: epel/7
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"
+    - local_root: "{{ LOCAL_ROOT }}"
+      remote_site: "{{ THU }}"
+      remote_loc: elrepo/elrepo/el7
+      local_loc: elrepo/elrepo/el7 
+      repo_id: "{{ X }}"
+      delete: "{{ D }}"
+      newest: "{{ N }}"

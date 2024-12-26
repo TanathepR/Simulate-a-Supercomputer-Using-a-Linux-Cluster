@@ -1,0 +1,37 @@
+- hosts: all
+  gather_facts: false
+
+  vars:
+  - IPA_DOMAIN: pbs.toy
+  - TORQUE_SERVER: torque.{{ IPA_DOMAIN }}
+  - CPU_PER_NODE: 2
+  - nodes:
+    - name: node1
+    - name: node2
+    - name: node3
+    - name: node4
+
+  tasks:
+  - yum: name=torque-server,torque,torque-scheduler
+
+  - copy: dest=/etc/torque/server_name content={{ TORQUE_SERVER }}
+  - command: pkill pbs_server
+    ignore_errors: true
+  - command: pbs_server -f -t create
+  - command: sleep 2
+  - command: pkill pbs_server
+  - command: cp -r /var/lib/torque /var/lib/torque.ori
+
+  - yum: name=xmlstarlet
+  - command: xmlstarlet ed --inplace --subnode /server_db/attributes --type 'elem' -n 'managers' -v root@login.{{ IPA_DOMAIN }} /var/lib/torque/server_priv/serverdb
+  
+  - lineinfile: create=true path=/var/lib/torque/server_priv/nodes line="{{ item.name }}.{{ IPA_DOMAIN }} np={{ CPU_PER_NODE }} num_node_boards=1"
+    with_items: "{{ nodes }}"
+
+  - systemd: enabled=yes state=started name=pbs_server
+  - systemd: enabled=yes state=started name=pbs_sched
+
+  - command: create-munge-key -f
+  - command: mkdir /home/munge --parent
+  - command: cp --archive --remove-destination /etc/munge/munge.key /home/munge
+  - systemd: enabled=yes state=started name=munge

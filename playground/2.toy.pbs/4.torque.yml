@@ -1,0 +1,69 @@
+- hosts: torque_server_nodes
+  gather_facts: false
+
+  tasks:
+  - yum: name=torque-server,torque,torque-scheduler
+
+  - copy: dest=/etc/torque/server_name content={{ TORQUE_SERVER }}
+  - command: pkill pbs_server
+    ignore_errors: true
+  - command: pbs_server -f -t create
+  - command: sleep 2
+  - command: pkill pbs_server
+  - command: cp -r /var/lib/torque /var/lib/torque.ori
+
+  - yum: name=xmlstarlet
+  - command: xmlstarlet ed --inplace --subnode /server_db/attributes --type 'elem' -n 'managers' -v root@{{ TORQUE_CLIENT }} /var/lib/torque/server_priv/serverdb
+  
+  - lineinfile: create=true path=/var/lib/torque/server_priv/nodes line="{{ item.name }}.{{ IPA_DOMAIN }} np={{ CPU_PER_NODE }} num_node_boards=1"
+    with_items: "{{ torque_mom_nodes }}"
+
+  - systemd: enabled=yes state=started name=pbs_server
+  - systemd: enabled=yes state=started name=pbs_sched
+
+  - command: create-munge-key -f
+  - command: mkdir /home/munge --parent
+  - command: cp --archive --remove-destination /etc/munge/munge.key /home/munge
+  - systemd: enabled=yes state=started name=munge
+
+ 
+- hosts: torque_mom_nodes
+  gather_facts: false
+
+  tasks:
+  - yum: name=munge
+  - command: cp --archive --remove-destination /home/munge/munge.key /etc/munge
+  - systemd: enabled=yes state=started name=munge
+
+  - yum: name=torque,torque-mom
+  - copy: dest=/etc/torque/server_name content={{ TORQUE_SERVER }}
+  - copy: dest=/etc/torque/mom/config content="$pbsserver {{ TORQUE_SERVER }}"
+  - lineinfile: path=/etc/torque/mom/config line="$usecp *:/home /home"
+  - systemd: enabled=yes state=started name=pbs_mom
+  - yum: name=mpitests-openmpi,mpitests-mvapich2,mpitests-mpich,rdma-core-devel
+
+
+
+- hosts: torque_client_nodes
+  gather_facts: false
+
+  tasks:
+  - copy: src=/root/.ssh/id_ecdsa dest=/root/.ssh mode=600
+
+  - yum: name=munge
+  - command: cp --archive --remove-destination /home/munge/munge.key /etc/munge
+  - systemd: enabled=yes state=started name=munge
+
+  - yum: name=torque,torque-client
+  - copy: dest=/etc/torque/server_name content={{ TORQUE_SERVER }}
+  - systemd: enabled=yes state=started name=trqauthd
+
+  - command: qmgr -c ' print server '
+  - command: qmgr -c ' set server default_queue = b '
+  - command: qmgr -c ' create queue b '
+  - command: qmgr -c ' set queue b queue_type = Execution '
+  - command: qmgr -c ' set queue b enabled=true '
+  - command: qmgr -c ' set server submit_hosts = login.{{ IPA_DOMAIN }} '
+  - command: qmgr -c ' set queue b started=true '
+  - command: qmgr -c ' set server scheduling=true '
+  - command: qmgr -c ' print server '

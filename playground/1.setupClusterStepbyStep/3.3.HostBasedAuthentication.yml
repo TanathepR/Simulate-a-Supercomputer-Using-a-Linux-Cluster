@@ -1,0 +1,24 @@
+- hosts: all
+  gather_facts: false
+
+  handlers:
+  - systemd: state=restarted name=sshd
+    name: restart_sshd
+
+  tasks:
+
+  - lineinfile: state=present path=/etc/ssh/ssh_config.d/01-HostbasedAuthentication.conf line='HostbasedAuthentication yes' create=true
+  - lineinfile: state=present path=/etc/ssh/ssh_config line='EnableSSHKeysign yes' create=true
+  - lineinfile: state=present path=/etc/ssh/sshd_config.d/01-HostbasedAuthentication.conf line='HostbasedAuthentication yes' create=true
+  - lineinfile: state=present path=/etc/ssh/sshd_config.d/01-HostbasedAuthentication.conf line='UseDNS yes' create=true
+  - lineinfile: state=present path=/etc/ssh/sshd_config.d/01-HostbasedAuthentication.conf line='IgnoreUserKnownHosts yes' create=true
+    notify: restart_sshd
+
+  - yum: name=hostname
+  - command: hostname
+    register: shost
+  - lineinfile: state=present path=/home/root/etc/ssh/shosts.equiv line="{{ shost.stdout }}" create=true
+  - lineinfile: state=present path=/home/root/etc/ssh/shosts.equiv line="{{ shost.stdout }}" create=true
+
+  - shell: sort /home/root//etc/ssh/shosts.equiv > /etc/ssh/shosts.equiv
+  - shell: ssh-keyscan -t ecdsa -f /etc/ssh/shosts.equiv 2>/dev/null 1>/etc/ssh/ssh_known_hosts

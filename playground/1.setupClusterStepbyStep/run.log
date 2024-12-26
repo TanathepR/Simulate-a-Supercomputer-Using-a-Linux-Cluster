@@ -1,0 +1,1000 @@
+
+PLAY [localhost] ***************************************************************
+
+TASK [Create internal podman network for domain "pbs.toy"] *********************
+changed: [localhost]
+
+TASK [file] ********************************************************************
+ok: [localhost]
+
+TASK [file] ********************************************************************
+changed: [localhost]
+
+TASK [Create FreeIPA podman container for domain "pbs.toy"] ********************
+changed: [localhost]
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=4    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+PLAY [localhost] ***************************************************************
+
+TASK [file] ********************************************************************
+changed: [localhost]
+
+TASK [Create Compute nodes and TORQUE server podman containers for domain "pbs.toy"] ***
+changed: [localhost] => (item={'name': 'torque'})
+changed: [localhost] => (item={'name': 'node1'})
+changed: [localhost] => (item={'name': 'node2'})
+changed: [localhost] => (item={'name': 'node3'})
+changed: [localhost] => (item={'name': 'node4'})
+
+TASK [containers.podman.podman_container] **************************************
+changed: [localhost]
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=3    changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+CONTAINER ID  IMAGE                                       COMMAND               CREATED                 STATUS                 PORTS                   NAMES
+9ccaff666dab  docker.io/library/python:latest             python -m http.se...  21 hours ago            Up 21 hours            0.0.0.0:8000->8000/tcp  http_8000_repos
+22eff1e42ec1  docker.io/aaii/fastgithub:latest                                  21 hours ago            Up 21 hours                                    fastgithub
+212e71c73530  docker.io/freeipa/freeipa-server:fedora-40  --unattended --ds...  9 hours ago             Up 9 hours                                     ipa.hpc.ai
+d9c302d81a05  docker.io/rockylinux/rockylinux:9-ubi-init  /sbin/init            9 hours ago             Up 9 hours                                     torque.hpc.ai
+2400597d91ed  docker.io/rockylinux/rockylinux:9-ubi-init  /sbin/init            9 hours ago             Up 9 hours                                     node1.hpc.ai
+9374e888f058  docker.io/rockylinux/rockylinux:9-ubi-init  /sbin/init            9 hours ago             Up 9 hours                                     node2.hpc.ai
+0a34b1fd378e  docker.io/rockylinux/rockylinux:9-ubi-init  /sbin/init            9 hours ago             Up 9 hours                                     node3.hpc.ai
+08a6dc0b1f5f  docker.io/rockylinux/rockylinux:9-ubi-init  /sbin/init            9 hours ago             Up 9 hours                                     node4.hpc.ai
+2f645413b30a  docker.io/rockylinux/rockylinux:9-ubi-init  /sbin/init            9 hours ago             Up 9 hours             0.0.0.0:2024->22/tcp    login.hpc.ai
+a7d605f9c344  docker.io/jeessy/ddns-go:latest             -l :9876 -f 300       59 minutes ago          Up 59 minutes                                  ddns_go_9876
+9928dbca65de  docker.io/freeipa/freeipa-server:fedora-40  --unattended --ds...  5 seconds ago           Up 5 seconds                                   ipa.pbs.toy
+57bfea2732dc  docker.io/rockylinux/rockylinux:9-ubi-init  /sbin/init            3 seconds ago           Up 4 seconds                                   torque.pbs.toy
+cbefc43ec1c1  docker.io/rockylinux/rockylinux:9-ubi-init  /sbin/init            2 seconds ago           Up 3 seconds                                   node1.pbs.toy
+870cfa0a97b8  docker.io/rockylinux/rockylinux:9-ubi-init  /sbin/init            2 seconds ago           Up 2 seconds                                   node2.pbs.toy
+63c2483fbe45  docker.io/rockylinux/rockylinux:9-ubi-init  /sbin/init            1 second ago            Up 2 seconds                                   node3.pbs.toy
+5fc7335e2568  docker.io/rockylinux/rockylinux:9-ubi-init  /sbin/init            Less than a second ago  Up 1 second                                    node4.pbs.toy
+1451d5f197c8  docker.io/rockylinux/rockylinux:9-ubi-init  /sbin/init            Less than a second ago  Up Less than a second  0.0.0.0:2025->22/tcp    login.pbs.toy
+
+PLAY [all] *********************************************************************
+
+TASK [file] ********************************************************************
+changed: [node1.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [shell] *******************************************************************
+changed: [node1.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [yum_repository] **********************************************************
+changed: [node3.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9.4/BaseOS', 'name': 'EL9Rocky9BaseOS'})
+changed: [node1.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9.4/BaseOS', 'name': 'EL9Rocky9BaseOS'})
+changed: [login.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9.4/BaseOS', 'name': 'EL9Rocky9BaseOS'})
+changed: [node2.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9.4/BaseOS', 'name': 'EL9Rocky9BaseOS'})
+changed: [node3.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9.4/AppStream', 'name': 'EL9Rocky9AppStream'})
+changed: [torque.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9.4/BaseOS', 'name': 'EL9Rocky9BaseOS'})
+changed: [node1.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9.4/AppStream', 'name': 'EL9Rocky9AppStream'})
+changed: [login.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9.4/AppStream', 'name': 'EL9Rocky9AppStream'})
+changed: [node3.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9/CRB/x86_64/kickstart', 'name': 'EL9CRB'})
+changed: [node2.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9.4/AppStream', 'name': 'EL9Rocky9AppStream'})
+changed: [torque.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9.4/AppStream', 'name': 'EL9Rocky9AppStream'})
+changed: [node1.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9/CRB/x86_64/kickstart', 'name': 'EL9CRB'})
+changed: [login.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9/CRB/x86_64/kickstart', 'name': 'EL9CRB'})
+changed: [node2.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9/CRB/x86_64/kickstart', 'name': 'EL9CRB'})
+changed: [torque.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9/CRB/x86_64/kickstart', 'name': 'EL9CRB'})
+changed: [node1.pbs.toy] => (item={'baseurl': 'http://av8d:8000/epel/9/Everything/x86_64', 'name': 'EL9epelEverything'})
+changed: [node3.pbs.toy] => (item={'baseurl': 'http://av8d:8000/epel/9/Everything/x86_64', 'name': 'EL9epelEverything'})
+changed: [login.pbs.toy] => (item={'baseurl': 'http://av8d:8000/epel/9/Everything/x86_64', 'name': 'EL9epelEverything'})
+changed: [node2.pbs.toy] => (item={'baseurl': 'http://av8d:8000/epel/9/Everything/x86_64', 'name': 'EL9epelEverything'})
+changed: [node3.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9/HighAvailability/x86_64/kickstart', 'name': 'EL9HighAvailability'})
+changed: [torque.pbs.toy] => (item={'baseurl': 'http://av8d:8000/epel/9/Everything/x86_64', 'name': 'EL9epelEverything'})
+changed: [login.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9/HighAvailability/x86_64/kickstart', 'name': 'EL9HighAvailability'})
+changed: [node1.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9/HighAvailability/x86_64/kickstart', 'name': 'EL9HighAvailability'})
+changed: [node2.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9/HighAvailability/x86_64/kickstart', 'name': 'EL9HighAvailability'})
+changed: [torque.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9/HighAvailability/x86_64/kickstart', 'name': 'EL9HighAvailability'})
+changed: [node3.pbs.toy] => (item={'baseurl': 'http://av8d:8000/elrepo/elrepo/el9/x86_64', 'name': 'EL9elrepo'})
+changed: [login.pbs.toy] => (item={'baseurl': 'http://av8d:8000/elrepo/elrepo/el9/x86_64', 'name': 'EL9elrepo'})
+changed: [node1.pbs.toy] => (item={'baseurl': 'http://av8d:8000/elrepo/elrepo/el9/x86_64', 'name': 'EL9elrepo'})
+changed: [node2.pbs.toy] => (item={'baseurl': 'http://av8d:8000/elrepo/elrepo/el9/x86_64', 'name': 'EL9elrepo'})
+changed: [torque.pbs.toy] => (item={'baseurl': 'http://av8d:8000/elrepo/elrepo/el9/x86_64', 'name': 'EL9elrepo'})
+changed: [node4.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9.4/BaseOS', 'name': 'EL9Rocky9BaseOS'})
+changed: [node4.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9.4/AppStream', 'name': 'EL9Rocky9AppStream'})
+changed: [node4.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9/CRB/x86_64/kickstart', 'name': 'EL9CRB'})
+changed: [node4.pbs.toy] => (item={'baseurl': 'http://av8d:8000/epel/9/Everything/x86_64', 'name': 'EL9epelEverything'})
+changed: [node4.pbs.toy] => (item={'baseurl': 'http://av8d:8000/rocky/9/HighAvailability/x86_64/kickstart', 'name': 'EL9HighAvailability'})
+changed: [node4.pbs.toy] => (item={'baseurl': 'http://av8d:8000/elrepo/elrepo/el9/x86_64', 'name': 'EL9elrepo'})
+
+TASK [yum_repository] **********************************************************
+changed: [node3.pbs.toy] => (item={'baseurl': 'http://av8d:8000/docker-ce/linux/centos/9/x86_64/stable', 'name': 'EL9docker-ce'})
+changed: [torque.pbs.toy] => (item={'baseurl': 'http://av8d:8000/docker-ce/linux/centos/9/x86_64/stable', 'name': 'EL9docker-ce'})
+changed: [login.pbs.toy] => (item={'baseurl': 'http://av8d:8000/docker-ce/linux/centos/9/x86_64/stable', 'name': 'EL9docker-ce'})
+changed: [node1.pbs.toy] => (item={'baseurl': 'http://av8d:8000/docker-ce/linux/centos/9/x86_64/stable', 'name': 'EL9docker-ce'})
+changed: [node2.pbs.toy] => (item={'baseurl': 'http://av8d:8000/docker-ce/linux/centos/9/x86_64/stable', 'name': 'EL9docker-ce'})
+changed: [node3.pbs.toy] => (item={'baseurl': 'http://av8d:8000/libnvidia-container/stable/rpm/x86_64', 'name': 'EL9libnvidia-container'})
+changed: [torque.pbs.toy] => (item={'baseurl': 'http://av8d:8000/libnvidia-container/stable/rpm/x86_64', 'name': 'EL9libnvidia-container'})
+changed: [node1.pbs.toy] => (item={'baseurl': 'http://av8d:8000/libnvidia-container/stable/rpm/x86_64', 'name': 'EL9libnvidia-container'})
+changed: [login.pbs.toy] => (item={'baseurl': 'http://av8d:8000/libnvidia-container/stable/rpm/x86_64', 'name': 'EL9libnvidia-container'})
+changed: [node2.pbs.toy] => (item={'baseurl': 'http://av8d:8000/libnvidia-container/stable/rpm/x86_64', 'name': 'EL9libnvidia-container'})
+changed: [node3.pbs.toy] => (item={'baseurl': 'http://av8d:8000/kubernetes/yum/repos/kubernetes-el7-x86_64', 'name': 'ELKubernetes'})
+changed: [torque.pbs.toy] => (item={'baseurl': 'http://av8d:8000/kubernetes/yum/repos/kubernetes-el7-x86_64', 'name': 'ELKubernetes'})
+changed: [node1.pbs.toy] => (item={'baseurl': 'http://av8d:8000/kubernetes/yum/repos/kubernetes-el7-x86_64', 'name': 'ELKubernetes'})
+changed: [login.pbs.toy] => (item={'baseurl': 'http://av8d:8000/kubernetes/yum/repos/kubernetes-el7-x86_64', 'name': 'ELKubernetes'})
+changed: [node2.pbs.toy] => (item={'baseurl': 'http://av8d:8000/kubernetes/yum/repos/kubernetes-el7-x86_64', 'name': 'ELKubernetes'})
+changed: [node4.pbs.toy] => (item={'baseurl': 'http://av8d:8000/docker-ce/linux/centos/9/x86_64/stable', 'name': 'EL9docker-ce'})
+changed: [node4.pbs.toy] => (item={'baseurl': 'http://av8d:8000/libnvidia-container/stable/rpm/x86_64', 'name': 'EL9libnvidia-container'})
+changed: [node4.pbs.toy] => (item={'baseurl': 'http://av8d:8000/kubernetes/yum/repos/kubernetes-el7-x86_64', 'name': 'ELKubernetes'})
+
+TASK [yum] *********************************************************************
+changed: [login.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [node3.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [yum] *********************************************************************
+changed: [torque.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [systemd] *****************************************************************
+fatal: [node3.pbs.toy]: FAILED! => {"changed": false, "msg": "Unable to start service NetworkManager: A dependency job for NetworkManager.service failed. See 'journalctl -xe' for details.\n"}
+fatal: [torque.pbs.toy]: FAILED! => {"changed": false, "msg": "Unable to start service NetworkManager: A dependency job for NetworkManager.service failed. See 'journalctl -xe' for details.\n"}
+fatal: [node2.pbs.toy]: FAILED! => {"changed": false, "msg": "Unable to start service NetworkManager: A dependency job for NetworkManager.service failed. See 'journalctl -xe' for details.\n"}
+fatal: [login.pbs.toy]: FAILED! => {"changed": false, "msg": "Unable to start service NetworkManager: A dependency job for NetworkManager.service failed. See 'journalctl -xe' for details.\n"}
+changed: [node1.pbs.toy]
+fatal: [node4.pbs.toy]: FAILED! => {"changed": false, "msg": "Unable to start service NetworkManager: A dependency job for NetworkManager.service failed. See 'journalctl -xe' for details.\n"}
+
+PLAY RECAP *********************************************************************
+login.pbs.toy              : ok=7    changed=7    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+node1.pbs.toy              : ok=8    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node2.pbs.toy              : ok=7    changed=7    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+node3.pbs.toy              : ok=7    changed=7    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+node4.pbs.toy              : ok=7    changed=7    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+torque.pbs.toy             : ok=7    changed=7    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+
+
+PLAY [all] *********************************************************************
+
+TASK [yum] *********************************************************************
+ok: [node2.pbs.toy]
+ok: [node3.pbs.toy]
+ok: [node1.pbs.toy]
+ok: [login.pbs.toy]
+ok: [torque.pbs.toy]
+ok: [node4.pbs.toy]
+
+TASK [lineinfile] **************************************************************
+changed: [node3.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [lineinfile] **************************************************************
+changed: [node3.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [lineinfile] **************************************************************
+changed: [node1.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [authorized_key] **********************************************************
+changed: [login.pbs.toy] => (item=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIXMEgrETPxr17AdWo3YSLLqiRlHC9hQ2+dfuJeR+imEUtSl0KUuW5KuhwUjNV78ZH4kywciapCRgziKeqKkTds=)
+changed: [torque.pbs.toy] => (item=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIXMEgrETPxr17AdWo3YSLLqiRlHC9hQ2+dfuJeR+imEUtSl0KUuW5KuhwUjNV78ZH4kywciapCRgziKeqKkTds=)
+changed: [node3.pbs.toy] => (item=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIXMEgrETPxr17AdWo3YSLLqiRlHC9hQ2+dfuJeR+imEUtSl0KUuW5KuhwUjNV78ZH4kywciapCRgziKeqKkTds=)
+changed: [node1.pbs.toy] => (item=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIXMEgrETPxr17AdWo3YSLLqiRlHC9hQ2+dfuJeR+imEUtSl0KUuW5KuhwUjNV78ZH4kywciapCRgziKeqKkTds=)
+changed: [node2.pbs.toy] => (item=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIXMEgrETPxr17AdWo3YSLLqiRlHC9hQ2+dfuJeR+imEUtSl0KUuW5KuhwUjNV78ZH4kywciapCRgziKeqKkTds=)
+changed: [node3.pbs.toy] => (item=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBlpC4ImvIS6NryioaSB1gdHbCkYbV1AOv3FmhS1I/PFeplxl6dzdo8sddeuOOf6av+rPl5erCFsTExCs2h5kS8= root@i.10042008.xyz)
+changed: [login.pbs.toy] => (item=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBlpC4ImvIS6NryioaSB1gdHbCkYbV1AOv3FmhS1I/PFeplxl6dzdo8sddeuOOf6av+rPl5erCFsTExCs2h5kS8= root@i.10042008.xyz)
+changed: [node2.pbs.toy] => (item=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBlpC4ImvIS6NryioaSB1gdHbCkYbV1AOv3FmhS1I/PFeplxl6dzdo8sddeuOOf6av+rPl5erCFsTExCs2h5kS8= root@i.10042008.xyz)
+changed: [torque.pbs.toy] => (item=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBlpC4ImvIS6NryioaSB1gdHbCkYbV1AOv3FmhS1I/PFeplxl6dzdo8sddeuOOf6av+rPl5erCFsTExCs2h5kS8= root@i.10042008.xyz)
+changed: [node4.pbs.toy] => (item=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIXMEgrETPxr17AdWo3YSLLqiRlHC9hQ2+dfuJeR+imEUtSl0KUuW5KuhwUjNV78ZH4kywciapCRgziKeqKkTds=)
+changed: [node1.pbs.toy] => (item=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBlpC4ImvIS6NryioaSB1gdHbCkYbV1AOv3FmhS1I/PFeplxl6dzdo8sddeuOOf6av+rPl5erCFsTExCs2h5kS8= root@i.10042008.xyz)
+changed: [node4.pbs.toy] => (item=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBlpC4ImvIS6NryioaSB1gdHbCkYbV1AOv3FmhS1I/PFeplxl6dzdo8sddeuOOf6av+rPl5erCFsTExCs2h5kS8= root@i.10042008.xyz)
+
+RUNNING HANDLER [restart_sshd] *************************************************
+changed: [login.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node4.pbs.toy]
+
+PLAY RECAP *********************************************************************
+login.pbs.toy              : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node1.pbs.toy              : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node2.pbs.toy              : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node3.pbs.toy              : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node4.pbs.toy              : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+torque.pbs.toy             : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+PLAY [all] *********************************************************************
+
+TASK [lineinfile] **************************************************************
+changed: [node2.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [login.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [lineinfile] **************************************************************
+changed: [torque.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [lineinfile] **************************************************************
+changed: [node1.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [lineinfile] **************************************************************
+changed: [torque.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [lineinfile] **************************************************************
+changed: [login.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [yum] *********************************************************************
+changed: [login.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [node2.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [lineinfile] **************************************************************
+changed: [login.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [lineinfile] **************************************************************
+ok: [torque.pbs.toy]
+ok: [login.pbs.toy]
+ok: [node3.pbs.toy]
+ok: [node2.pbs.toy]
+ok: [node1.pbs.toy]
+ok: [node4.pbs.toy]
+
+TASK [shell] *******************************************************************
+changed: [torque.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [shell] *******************************************************************
+changed: [login.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node4.pbs.toy]
+
+RUNNING HANDLER [restart_sshd] *************************************************
+changed: [login.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node4.pbs.toy]
+
+PLAY RECAP *********************************************************************
+login.pbs.toy              : ok=12   changed=11   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node1.pbs.toy              : ok=12   changed=11   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node2.pbs.toy              : ok=12   changed=11   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node3.pbs.toy              : ok=12   changed=11   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node4.pbs.toy              : ok=12   changed=11   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+torque.pbs.toy             : ok=12   changed=11   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.3  0.0 169628 13452 ?        Ss   02:57   0:00 /usr/lib/systemd/systemd --system --deserialize 20
+root         388  0.0  0.0  26136 13564 ?        Ss   02:58   0:00 /usr/lib/systemd/systemd-journald
+root         790  0.0  0.0  15792  9500 ?        Ss   02:59   0:00 sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups
+root         793  0.0  0.0   7148  3108 pts/1    Rs+  02:59   0:00 ps aux
+systemd --system --deserialize 20
+  |-sshd
+  `-systemd-journal
+PING node2(fd9f:7b9c:de99:d0cf::5 (fd9f:7b9c:de99:d0cf::5)) 56 data bytes
+64 bytes from fd9f:7b9c:de99:d0cf::5 (fd9f:7b9c:de99:d0cf::5): icmp_seq=1 ttl=64 time=0.019 ms
+64 bytes from fd9f:7b9c:de99:d0cf::5 (fd9f:7b9c:de99:d0cf::5): icmp_seq=2 ttl=64 time=0.044 ms
+
+--- node2 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1005ms
+rtt min/avg/max/mdev = 0.019/0.031/0.044/0.012 ms
+wait 150 seconds here until IPA server is up
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+let's wait for another 10 seconds
+FreeIPA server configured.
+cccccbkvkihgrkhugcthlinvivnekdglvkntfvdfgkhf
+Entry for principal admin with kvno 1, encryption type aes256-cts-hmac-sha384-192 added to keytab FILE:/etc/krb5.keytab.
+Entry for principal admin with kvno 1, encryption type aes128-cts-hmac-sha256-128 added to keytab FILE:/etc/krb5.keytab.
+Entry for principal admin with kvno 1, encryption type aes256-cts-hmac-sha1-96 added to keytab FILE:/etc/krb5.keytab.
+Entry for principal admin with kvno 1, encryption type aes128-cts-hmac-sha1-96 added to keytab FILE:/etc/krb5.keytab.
+Ticket cache: FILE:/tmp/krb5cc_0
+Default principal: admin@PBS.TOY
+
+Valid starting     Expires            Service principal
+06/03/24 03:02:40  06/04/24 02:27:25  krbtgt/PBS.TOY@PBS.TOY
+------------------
+Added user "munge"
+------------------
+  User login: munge
+  First name: munge
+  Last name: munge
+  Full name: munge munge
+  Display name: munge munge
+  Initials: mm
+  Home directory: /home/munge
+  GECOS: munge munge
+  Login shell: /bin/sh
+  Principal name: munge@PBS.TOY
+  Principal alias: munge@PBS.TOY
+  Email address: munge@pbs.toy
+  UID: 497200003
+  GID: 497200003
+  Password: False
+  Member of groups: ipausers
+  Kerberos keys available: False
+----------------
+Added user "hpc"
+----------------
+  User login: hpc
+  First name: hpc
+  Last name: hpc
+  Full name: hpc hpc
+  Display name: hpc hpc
+  Initials: hh
+  Home directory: /home/hpc
+  GECOS: hpc hpc
+  Login shell: /bin/sh
+  Principal name: hpc@PBS.TOY
+  Principal alias: hpc@PBS.TOY
+  Email address: hpc@pbs.toy
+  UID: 497200004
+  GID: 497200004
+  Password: False
+  Member of groups: ipausers
+  Kerberos keys available: False
+-------------------
+Modified user "hpc"
+-------------------
+  User login: hpc
+  First name: hpc
+  Last name: hpc
+  Home directory: /home/hpc
+  Login shell: /bin/sh
+  Principal name: hpc@PBS.TOY
+  Principal alias: hpc@PBS.TOY
+  Email address: hpc@pbs.toy
+  UID: 497200004
+  GID: 497200004
+  SSH public key: ecdsa-sha2-nistp256
+                  AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBlpC4ImvIS6NryioaSB1gdHbCkYbV1AOv3FmhS1I/PFeplxl6dzdo8sddeuOOf6av+rPl5erCFsTExCs2h5kS8=
+  SSH public key fingerprint: SHA256:xBW+PnJ13OyizdAhZYhcm5sYUEolVbmlwtUBcmIwCp4
+                              (ecdsa-sha2-nistp256)
+  Account disabled: False
+  Password: False
+  Member of groups: ipausers
+  Kerberos keys available: False
+  Zone name: pbs.toy.
+  Active zone: True
+  Authoritative nameserver: ipa.pbs.toy.
+  Administrator e-mail address: hostmaster.pbs.toy.
+  SOA serial: 1717383761
+  SOA refresh: 3600
+  SOA retry: 900
+  SOA expire: 1209600
+  SOA minimum: 3600
+  BIND update policy: grant PBS.TOY krb5-self * A; grant PBS.TOY krb5-self * AAAA;
+                      grant PBS.TOY krb5-self * SSHFP;
+  Dynamic update: True
+  Allow query: any;
+  Allow transfer: none;
+  Allow PTR sync: True
+id: 'munge': no such user
+
+PLAY [all] *********************************************************************
+
+TASK [yum] *********************************************************************
+changed: [torque.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [shell] *******************************************************************
+changed: [node1.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [shell] *******************************************************************
+changed: [node2.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [login.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [command] *****************************************************************
+fatal: [login.pbs.toy]: FAILED! => {"changed": true, "cmd": ["ipa-client-install", "--uninstall", "--unattended"], "delta": "0:00:00.322985", "end": "2024-06-03 03:02:57.155220", "msg": "non-zero return code", "rc": 2, "start": "2024-06-03 03:02:56.832235", "stderr": "IPA client is not configured on this system.\nThe ipa-client-install command failed.", "stderr_lines": ["IPA client is not configured on this system.", "The ipa-client-install command failed."], "stdout": "", "stdout_lines": []}
+...ignoring
+fatal: [node1.pbs.toy]: FAILED! => {"changed": true, "cmd": ["ipa-client-install", "--uninstall", "--unattended"], "delta": "0:00:00.327255", "end": "2024-06-03 03:02:57.119567", "msg": "non-zero return code", "rc": 2, "start": "2024-06-03 03:02:56.792312", "stderr": "IPA client is not configured on this system.\nThe ipa-client-install command failed.", "stderr_lines": ["IPA client is not configured on this system.", "The ipa-client-install command failed."], "stdout": "", "stdout_lines": []}
+...ignoring
+fatal: [node2.pbs.toy]: FAILED! => {"changed": true, "cmd": ["ipa-client-install", "--uninstall", "--unattended"], "delta": "0:00:00.338034", "end": "2024-06-03 03:02:57.293266", "msg": "non-zero return code", "rc": 2, "start": "2024-06-03 03:02:56.955232", "stderr": "IPA client is not configured on this system.\nThe ipa-client-install command failed.", "stderr_lines": ["IPA client is not configured on this system.", "The ipa-client-install command failed."], "stdout": "", "stdout_lines": []}
+...ignoring
+fatal: [torque.pbs.toy]: FAILED! => {"changed": true, "cmd": ["ipa-client-install", "--uninstall", "--unattended"], "delta": "0:00:00.329936", "end": "2024-06-03 03:02:57.463597", "msg": "non-zero return code", "rc": 2, "start": "2024-06-03 03:02:57.133661", "stderr": "IPA client is not configured on this system.\nThe ipa-client-install command failed.", "stderr_lines": ["IPA client is not configured on this system.", "The ipa-client-install command failed."], "stdout": "", "stdout_lines": []}
+...ignoring
+fatal: [node3.pbs.toy]: FAILED! => {"changed": true, "cmd": ["ipa-client-install", "--uninstall", "--unattended"], "delta": "0:00:00.333294", "end": "2024-06-03 03:02:57.493085", "msg": "non-zero return code", "rc": 2, "start": "2024-06-03 03:02:57.159791", "stderr": "IPA client is not configured on this system.\nThe ipa-client-install command failed.", "stderr_lines": ["IPA client is not configured on this system.", "The ipa-client-install command failed."], "stdout": "", "stdout_lines": []}
+...ignoring
+fatal: [node4.pbs.toy]: FAILED! => {"changed": true, "cmd": ["ipa-client-install", "--uninstall", "--unattended"], "delta": "0:00:00.239374", "end": "2024-06-03 03:02:58.219793", "msg": "non-zero return code", "rc": 2, "start": "2024-06-03 03:02:57.980419", "stderr": "IPA client is not configured on this system.\nThe ipa-client-install command failed.", "stderr_lines": ["IPA client is not configured on this system.", "The ipa-client-install command failed."], "stdout": "", "stdout_lines": []}
+...ignoring
+
+TASK [shell] *******************************************************************
+changed: [login.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [torque.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [systemd] *****************************************************************
+ok: [node1.pbs.toy]
+ok: [login.pbs.toy]
+ok: [node3.pbs.toy]
+ok: [node2.pbs.toy]
+ok: [torque.pbs.toy]
+ok: [node4.pbs.toy]
+
+PLAY RECAP *********************************************************************
+login.pbs.toy              : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=1   
+node1.pbs.toy              : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=1   
+node2.pbs.toy              : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=1   
+node3.pbs.toy              : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=1   
+node4.pbs.toy              : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=1   
+torque.pbs.toy             : ok=6    changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=1   
+
+---------------
+7 hosts matched
+---------------
+  Host name: ipa.pbs.toy
+  Principal name: host/ipa.pbs.toy@PBS.TOY
+  Principal alias: host/ipa.pbs.toy@PBS.TOY
+
+  Host name: login.pbs.toy
+  Platform: x86_64
+  Operating system: 6.9.2-1.el9.elrepo.x86_64
+  Principal name: host/login.pbs.toy@PBS.TOY
+  Principal alias: host/login.pbs.toy@PBS.TOY
+  SSH public key fingerprint: SHA256:L7rLbnWvhE1gb+a7ufzl2M5hPQFujto1CISo+NbtCTg
+                              (ecdsa-sha2-nistp256),
+                              SHA256:goblPYiVOgQ6hVhZFo8lRh/Fk5bdMRlPgw1dkni+VE4
+                              (ssh-ed25519),
+                              SHA256:/sitJ0sYUL6LHp8RZuohcGWywt7HM8pOCEKds5kvueA
+                              (ssh-rsa)
+
+  Host name: node1.pbs.toy
+  Platform: x86_64
+  Operating system: 6.9.2-1.el9.elrepo.x86_64
+  Principal name: host/node1.pbs.toy@PBS.TOY
+  Principal alias: host/node1.pbs.toy@PBS.TOY
+  SSH public key fingerprint: SHA256:gXoNmxBPIwV1k8lk33yxp8ySSyrJskBQZbefT94rB6Q
+                              (ecdsa-sha2-nistp256),
+                              SHA256:8y2jjucnTLML3ySabPYXiySPK0b3iYE8eCdoRi2FSPg
+                              (ssh-ed25519),
+                              SHA256:AitQqz7itLuySlmhNzXh0tcRFL5/rx0xwn3ntUG+V/E
+                              (ssh-rsa)
+
+  Host name: node2.pbs.toy
+  Platform: x86_64
+  Operating system: 6.9.2-1.el9.elrepo.x86_64
+  Principal name: host/node2.pbs.toy@PBS.TOY
+  Principal alias: host/node2.pbs.toy@PBS.TOY
+  SSH public key fingerprint: SHA256:KYU+/FiiPL/ZqQGfkHkg6unNW7drjLh6fGPKXu2DSGE
+                              (ecdsa-sha2-nistp256),
+                              SHA256:jPJQSj7rfF2kBwjWtGJCcC3NO9bU62p3954fWoPPNc4
+                              (ssh-ed25519),
+                              SHA256:KwI4JpoV9W5Ugi358S+tUxYTBnC1Jbof5vdEJGTAXns
+                              (ssh-rsa)
+
+  Host name: node3.pbs.toy
+  Platform: x86_64
+  Operating system: 6.9.2-1.el9.elrepo.x86_64
+  Principal name: host/node3.pbs.toy@PBS.TOY
+  Principal alias: host/node3.pbs.toy@PBS.TOY
+  SSH public key fingerprint: SHA256:fhBleMU1BbNAZmylmQut2picchHH9PDyp9Ijv0zuzx0
+                              (ecdsa-sha2-nistp256),
+                              SHA256:IOqyYYx5LckDSV9gwZIjniex1q3vgeSDvOqGbiW4c2A
+                              (ssh-ed25519),
+                              SHA256:EwZzQ/x9tQfa1nrdBkFnCfRXOA+rT6gBvPTboBp7ccU
+                              (ssh-rsa)
+
+  Host name: node4.pbs.toy
+  Platform: x86_64
+  Operating system: 6.9.2-1.el9.elrepo.x86_64
+  Principal name: host/node4.pbs.toy@PBS.TOY
+  Principal alias: host/node4.pbs.toy@PBS.TOY
+  SSH public key fingerprint: SHA256:LnHJAARbZiI6GHJxJblV0XF4BzMhjYpkgOwHhqUpHXU
+                              (ecdsa-sha2-nistp256),
+                              SHA256:Z8chsX+CeCCw0o3Kzts2uc9YCYXtBV3L5rFzXFfoS0s
+                              (ssh-ed25519),
+                              SHA256:ZcOBldvGUT68ZyMu6+JGmivcS6Cmu+zhOfD7gNgdczo
+                              (ssh-rsa)
+
+  Host name: torque.pbs.toy
+  Platform: x86_64
+  Operating system: 6.9.2-1.el9.elrepo.x86_64
+  Principal name: host/torque.pbs.toy@PBS.TOY
+  Principal alias: host/torque.pbs.toy@PBS.TOY
+  SSH public key fingerprint: SHA256:FPXkmS6pqLceHn2+IBM8RHu2c3cErFLF2J/J7uCWur0
+                              (ecdsa-sha2-nistp256),
+                              SHA256:p/tggnZ9qqyZyx89HAErlx7QoJ9ko9N4TBDaLamUPLc
+                              (ssh-ed25519),
+                              SHA256:iWulDSNG+lpvQ4uul7xT9G5FcRnkObrJfnL4EPrfpAY
+                              (ssh-rsa)
+----------------------------
+Number of entries returned 7
+----------------------------
+---------------
+3 users matched
+---------------
+  User login: admin
+  Last name: Administrator
+  Home directory: /home/admin
+  Login shell: /bin/bash
+  Principal alias: admin@PBS.TOY, root@PBS.TOY
+  UID: 497200000
+  GID: 497200000
+  Account disabled: False
+
+  User login: hpc
+  First name: hpc
+  Last name: hpc
+  Home directory: /home/hpc
+  Login shell: /bin/sh
+  Principal name: hpc@PBS.TOY
+  Principal alias: hpc@PBS.TOY
+  Email address: hpc@pbs.toy
+  UID: 497200004
+  GID: 497200004
+  SSH public key fingerprint: SHA256:xBW+PnJ13OyizdAhZYhcm5sYUEolVbmlwtUBcmIwCp4
+                              (ecdsa-sha2-nistp256)
+  Account disabled: False
+
+  User login: munge
+  First name: munge
+  Last name: munge
+  Home directory: /home/munge
+  Login shell: /bin/sh
+  Principal name: munge@PBS.TOY
+  Principal alias: munge@PBS.TOY
+  Email address: munge@pbs.toy
+  UID: 497200003
+  GID: 497200003
+  Account disabled: False
+----------------------------
+Number of entries returned 3
+----------------------------
+  Zone name: 25.20.10.in-addr.arpa.
+  Active zone: True
+  Authoritative nameserver: ipa.pbs.toy.
+  Administrator e-mail address: hostmaster.pbs.toy.
+  SOA serial: 1717383787
+  SOA refresh: 3600
+  SOA retry: 900
+  SOA expire: 1209600
+  SOA minimum: 3600
+  BIND update policy: grant PBS.TOY krb5-subdomain 25.20.10.in-addr.arpa. PTR;
+  Dynamic update: True
+  Allow query: any;
+  Allow transfer: none;
+
+  Zone name: f.c.0.d.9.9.e.d.c.9.b.7.f.9.d.f.ip6.arpa.
+  Active zone: True
+  Authoritative nameserver: ipa.pbs.toy.
+  Administrator e-mail address: hostmaster.pbs.toy.
+  SOA serial: 1717383690
+  SOA refresh: 3600
+  SOA retry: 900
+  SOA expire: 1209600
+  SOA minimum: 3600
+  BIND update policy: grant PBS.TOY krb5-subdomain
+                      f.c.0.d.9.9.e.d.c.9.b.7.f.9.d.f.ip6.arpa. PTR;
+  Dynamic update: True
+  Allow query: any;
+  Allow transfer: none;
+
+  Zone name: pbs.toy.
+  Active zone: True
+  Authoritative nameserver: ipa.pbs.toy.
+  Administrator e-mail address: hostmaster.pbs.toy.
+  SOA serial: 1717383824
+  SOA refresh: 3600
+  SOA retry: 900
+  SOA expire: 1209600
+  SOA minimum: 3600
+  BIND update policy: grant PBS.TOY krb5-self * A; grant PBS.TOY krb5-self *
+                      AAAA; grant PBS.TOY krb5-self * SSHFP;
+  Dynamic update: True
+  Allow query: any;
+  Allow transfer: none;
+----------------------------
+Number of entries returned 3
+----------------------------
+  Record name: @
+  NS record: ipa.pbs.toy.
+
+  Record name: _kerberos
+  TXT record: "PBS.TOY"
+  URI record: 0 100 "krb5srv:m:tcp:ipa.pbs.toy.", 0 100
+              "krb5srv:m:udp:ipa.pbs.toy."
+
+  Record name: _kpasswd
+  URI record: 0 100 "krb5srv:m:tcp:ipa.pbs.toy.", 0 100
+              "krb5srv:m:udp:ipa.pbs.toy."
+
+  Record name: _kerberos._tcp
+  SRV record: 0 100 88 ipa.pbs.toy.
+
+  Record name: _kerberos-master._tcp
+  SRV record: 0 100 88 ipa.pbs.toy.
+
+  Record name: _kpasswd._tcp
+  SRV record: 0 100 464 ipa.pbs.toy.
+
+  Record name: _ldap._tcp
+  SRV record: 0 100 389 ipa.pbs.toy.
+
+  Record name: _kerberos._udp
+  SRV record: 0 100 88 ipa.pbs.toy.
+
+  Record name: _kerberos-master._udp
+  SRV record: 0 100 88 ipa.pbs.toy.
+
+  Record name: _kpasswd._udp
+  SRV record: 0 100 464 ipa.pbs.toy.
+
+  Record name: ipa
+  A record: 10.20.25.253
+  AAAA record: fd9f:7b9c:de99:d0cf::2
+
+  Record name: ipa-ca
+  A record: 10.20.25.253
+  AAAA record: fd9f:7b9c:de99:d0cf::2
+
+  Record name: login
+  A record: 10.20.25.6
+  SSHFP record: 3 1 14ABFB83B52756B93CBD34BC2E68C2C61CC26E33, 3 2
+                2FBACB6E75AF844D606FE6BBB9FCE5D8CE613D016E8EDA350884A8F8
+                D6ED0938, 4 1 CA2531241ACD453C7C58459C8520C43EC1B3C813, 4 2
+                8286E53D88953A043A855859168F25461FC59396DD31194F830D5D92
+                78BE544E, 1 1 AD74D1EB243660C5CE6FA4BC13AB1193A64EA729, 1 2
+                FEC8AD274B1850BE8B1E9F1166EA217065B2C2DEC733CA4E08429DB3 992FB9E0
+
+  Record name: node1
+  A record: 10.20.25.2
+  SSHFP record: 3 1 28A571E3931C7F7C641AA7821AF81DB053F3CFAC, 3 2
+                817A0D9B104F23057593C964DF7CB1A7CC924B2AC9B2405065B79F4F
+                DE2B07A4, 4 1 CC308C2DF2B0B52D8231DE94BAD206552104A64E, 4 2
+                F32DA38EE7274CB30BDF249A6CF6178B248F2B46F789813C78276846
+                2D8548F8, 1 1 1798D63359AE31E2E2010390FDA969D3D267D0D9, 1 2
+                022B50AB3EE2B4BBB24A59A13735E1D2D71114BE7FAF1D31C27DE7B5 41BE57F1
+
+  Record name: node2
+  A record: 10.20.25.3
+  SSHFP record: 3 1 F7FAF8EB17FEF44CCAAA737BC7E35CAAA6EF81E1, 3 2
+                29853EFC58A23CBFD9A9019F907920EAE9CD5BB76B8CB87A7C63CA5E
+                ED834861, 4 1 B261E3D6450EB39471B687BC68ADF09ABF7DA9C0, 4 2
+                8CF2504A3EEB7C5DA40708D6B46242702DCD3BD6D4EB6A77F79E1F5A
+                83CF35CE, 1 1 1B10CABCBCDF3F432EFB09D9416CBD6202CF95CF, 1 2
+                2B0238269A15F56E54822DF9F12FAD5316130670B525BA1FE6F74424 64C05E7B
+
+  Record name: node3
+  A record: 10.20.25.4
+  SSHFP record: 3 1 DEB08F2ED00B30B13F9E949DE32C0EA04F4CF5CD, 3 2
+                7E106578C53505B340666CA5990BADDA989C7211C7F4F0F2A7D223BF
+                4CEECF1D, 4 1 A100641BE55D40391EBEA0FE4F670EB6B235B294, 4 2
+                20EAB2618C792DC903495F60C192239E27B1D6ADEF81E483BCEA866E
+                25B87360, 1 1 201E5B86A6E9EA541E28E3F837EA1C2676460CD6, 1 2
+                13067343FC7DB507DAD67ADD06416709F457380FAB4FA801BCF4DBA0 1A7B71C5
+
+  Record name: node4
+  A record: 10.20.25.5
+  SSHFP record: 3 1 E92A5E7384AE3A70C14D484966CC5F59369A4C98, 3 2
+                2E71C900045B66223A18727125B955D171780733218D8A6480EC0786
+                A5291D75, 4 1 451C783BF4755B4C80DF2E3AEE5689173A8D5D88, 4 2
+                67C721B17F827820B0D28DCACEDB36B9CF580985ED055DCBE6B1735C
+                57E84B4B, 1 1 31CD1390B38ABC430D1EFAE2C5C57ED78DBEA457, 1 2
+                65C38195DBC6513EBC67232EEBE2469A2BDC4BA0A6BBECE139F0FB80 D81D733A
+
+  Record name: torque
+  A record: 10.20.25.1
+  SSHFP record: 3 1 85A4B8086888FFE956F3AE43E38D3350C846A3B1, 3 2
+                14F5E4992EA9A8B71E1E7DBE20133C447BB6737704AC52C5D89FC9EE
+                E096BABD, 4 1 01F5B76959D76BA7E081C510DC872DDAB9260D18, 4 2
+                A7FB6082767DAAAC99CB1F3D1C012B971ED0A09F64A3D3784C10DA2D
+                A9943CB7, 1 1 C0F9A245A1589E19C2A5ECA9933131D7BA6932A2, 1 2
+                896BA50D2346FA5A6F438BAE97BC53F46E457119E439BAC97E72F810 FADFA406
+-----------------------------
+Number of entries returned 18
+-----------------------------
+uid=497200003(munge) gid=497200003(munge) groups=497200003(munge)
+
+; <<>> DiG 9.16.23-RH <<>> torque.pbs.toy @10.20.24.253
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NXDOMAIN, id: 38960
+;; flags: qr rd ra; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 1232
+; COOKIE: 3d85e044ff37d02201000000665d3273b9859c010f06adb8 (good)
+;; QUESTION SECTION:
+;torque.pbs.toy.			IN	A
+
+;; Query time: 471 msec
+;; SERVER: 10.20.24.253#53(10.20.24.253)
+;; WHEN: Mon Jun 03 03:03:15 UTC 2024
+;; MSG SIZE  rcvd: 71
+
+
+PLAY [all] *********************************************************************
+
+TASK [yum] *********************************************************************
+changed: [torque.pbs.toy]
+
+TASK [copy] ********************************************************************
+changed: [torque.pbs.toy]
+
+TASK [command] *****************************************************************
+fatal: [torque.pbs.toy]: FAILED! => {"changed": true, "cmd": ["pkill", "pbs_server"], "delta": "0:00:00.035176", "end": "2024-06-03 03:03:20.189035", "msg": "non-zero return code", "rc": 1, "start": "2024-06-03 03:03:20.153859", "stderr": "", "stderr_lines": [], "stdout": "", "stdout_lines": []}
+...ignoring
+
+TASK [command] *****************************************************************
+changed: [torque.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [torque.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [torque.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [torque.pbs.toy]
+
+TASK [yum] *********************************************************************
+changed: [torque.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [torque.pbs.toy]
+
+TASK [lineinfile] **************************************************************
+changed: [torque.pbs.toy] => (item={'name': 'node1'})
+changed: [torque.pbs.toy] => (item={'name': 'node2'})
+changed: [torque.pbs.toy] => (item={'name': 'node3'})
+changed: [torque.pbs.toy] => (item={'name': 'node4'})
+
+TASK [systemd] *****************************************************************
+changed: [torque.pbs.toy]
+
+TASK [systemd] *****************************************************************
+changed: [torque.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [torque.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [torque.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [torque.pbs.toy]
+
+TASK [systemd] *****************************************************************
+changed: [torque.pbs.toy]
+
+PLAY RECAP *********************************************************************
+torque.pbs.toy             : ok=16   changed=16   unreachable=0    failed=0    skipped=0    rescued=0    ignored=1   
+
+
+PLAY [all] *********************************************************************
+
+TASK [copy] ********************************************************************
+changed: [login.pbs.toy]
+
+TASK [yum] *********************************************************************
+changed: [login.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [login.pbs.toy]
+
+TASK [systemd] *****************************************************************
+changed: [login.pbs.toy]
+
+TASK [yum] *********************************************************************
+changed: [login.pbs.toy]
+
+TASK [copy] ********************************************************************
+changed: [login.pbs.toy]
+
+TASK [systemd] *****************************************************************
+changed: [login.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [login.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [login.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [login.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [login.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [login.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [login.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [login.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [login.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [login.pbs.toy]
+
+PLAY RECAP *********************************************************************
+login.pbs.toy              : ok=16   changed=16   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+PLAY [all] *********************************************************************
+
+TASK [yum] *********************************************************************
+changed: [node1.pbs.toy]
+changed: [node4.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node2.pbs.toy]
+
+TASK [command] *****************************************************************
+changed: [node3.pbs.toy]
+changed: [node4.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node2.pbs.toy]
+
+TASK [systemd] *****************************************************************
+changed: [node3.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node4.pbs.toy]
+changed: [node2.pbs.toy]
+
+TASK [yum] *********************************************************************
+changed: [node3.pbs.toy]
+changed: [node4.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node2.pbs.toy]
+
+TASK [copy] ********************************************************************
+changed: [node2.pbs.toy]
+changed: [node4.pbs.toy]
+changed: [node3.pbs.toy]
+changed: [node1.pbs.toy]
+
+TASK [copy] ********************************************************************
+changed: [node3.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [lineinfile] **************************************************************
+changed: [node3.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node1.pbs.toy]
+changed: [node4.pbs.toy]
+
+TASK [systemd] *****************************************************************
+changed: [node1.pbs.toy]
+changed: [node4.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node3.pbs.toy]
+
+PLAY RECAP *********************************************************************
+node1.pbs.toy              : ok=8    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node2.pbs.toy              : ok=8    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node3.pbs.toy              : ok=8    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node4.pbs.toy              : ok=8    changed=8    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+PLAY [all] *********************************************************************
+
+TASK [yum] *********************************************************************
+changed: [node1.pbs.toy]
+changed: [node2.pbs.toy]
+changed: [node4.pbs.toy]
+changed: [node3.pbs.toy]
+
+PLAY RECAP *********************************************************************
+node1.pbs.toy              : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node2.pbs.toy              : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node3.pbs.toy              : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+node4.pbs.toy              : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+

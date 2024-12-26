@@ -1,0 +1,41 @@
+- hosts: ipa_server_nodes
+  gather_facts: false
+
+  tasks:
+  - command: kadmin.local ktadd -norandkey admin
+  - command: kinit -k admin
+  - command: klist
+  - command: ipa user-add munge --first munge --last munge
+  - command: ipa user-add hpc --first hpc --last hpc
+  - command: ipa user-mod hpc --sshpubkey="ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBlpC4ImvIS6NryioaSB1gdHbCkYbV1AOv3FmhS1I/PFeplxl6dzdo8sddeuOOf6av+rPl5erCFsTExCs2h5kS8="
+  - command: ipa dnszone-mod {{ IPA_DOMAIN }}. --allow-sync-ptr=True
+
+
+- hosts: ipa_client_nodes
+  gather_facts: false
+
+  tasks:
+  - yum: name=ipa-client,systemd-timesyncd,nscd
+
+  - shell: echo search {{ IPA_DOMAIN }} > /etc/resolv.conf
+  - shell: echo nameserver {{ SUBNET_PREFIX }}.253 >> /etc/resolv.conf
+
+  - command: ipa-client-install --uninstall --unattended 
+    ignore_errors: true
+
+  - shell: |
+      ipa-client-install \
+      --mkhomedir \
+      --ip-address=$(ip route get {{ SUBNET_PREFIX }}.0 | awk '/dev/{print $5}') \
+      --no-ntp --unattended \
+      --principal admin \
+      --password adadadad \
+      --domain "{{ IPA_DOMAIN }}" \
+      --server="ipa.{{ IPA_DOMAIN }}" \
+      --no-nisdomain \
+      --force-join \
+      --verbose
+
+  - systemd: enabled=yes state=started name=sssd
+#--all-ip-addresses \
+#--enable-dns-updates \

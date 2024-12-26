@@ -1,0 +1,5 @@
+- hosts: all
+  gather_facts: false
+
+  tasks:
+  - yum: name=mpitests-openmpi,mpitests-mvapich2,mpitests-mpich,rdma-core-devel

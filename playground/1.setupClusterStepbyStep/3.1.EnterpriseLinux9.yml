@@ -1,0 +1,46 @@
+- hosts: all
+  gather_facts: false
+
+  tasks:
+  - file: state=directory path=/etc/yum.repos.d/bak
+  - shell: mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/bak
+    ignore_errors: true
+
+  - yum_repository: gpgcheck=no enabled=yes baseurl={{ item.baseurl }} name={{ item.name }} description={{ item.name }}
+    with_items: '{{ enabled_repos }}'
+  - yum_repository: gpgcheck=no enabled=no baseurl={{ item.baseurl }} name={{ item.name }} description={{ item.name }}
+    with_items: '{{ disabled_repos }}'
+
+  - yum: state=present allowerasing=yes disablerepo=* enablerepo=EL9Rocky9BaseOS name=dnf-plugins-core
+  - command: dnf repolist
+
+  # EL9 container may need this rpm rebuild command
+  #- command: rpm --rebuilddb
+  - yum: state=present allowerasing=yes name=bash-completion,iputils,iproute,openssh-server,openssh-clients,NetworkManager,coreutils-common
+
+  - systemd: enabled=yes state=started name=NetworkManager
+
+  vars:
+  - repo_info:
+      el:
+        url: http://av8d:8000
+  - enabled_repos:
+    - baseurl: "{{ repo_info['el']['url'] }}/iso/rocky/9.4/BaseOS"
+      name: EL9Rocky9BaseOS
+    - baseurl: "{{ repo_info['el']['url'] }}/iso/rocky/9.4/AppStream"
+      name: EL9Rocky9AppStream
+    - baseurl: "{{ repo_info['el']['url'] }}/rocky/9/CRB/x86_64/kickstart"
+      name: EL9CRB
+    - baseurl: "{{ repo_info['el']['url'] }}/epel/9/Everything/x86_64"
+      name: EL9epelEverything
+    - baseurl: "{{ repo_info['el']['url'] }}/rocky/9/HighAvailability/x86_64/kickstart"
+      name: EL9HighAvailability
+    - baseurl: "{{ repo_info['el']['url'] }}/elrepo/elrepo/el9/x86_64"
+      name: EL9elrepo
+  - disabled_repos:
+    - baseurl: "{{ repo_info['el']['url'] }}/docker-ce/linux/centos/9/x86_64/stable"
+      name: EL9docker-ce
+    - baseurl: "{{ repo_info['el']['url'] }}/libnvidia-container/stable/rpm/x86_64"
+      name: EL9libnvidia-container
+    - baseurl: "{{ repo_info['el']['url'] }}/kubernetes/yum/repos/kubernetes-el7-x86_64"
+      name: ELKubernetes

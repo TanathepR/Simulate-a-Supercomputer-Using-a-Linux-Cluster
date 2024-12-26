@@ -1,0 +1,51 @@
+- hosts: el9
+  gather_facts: false
+
+  handlers:
+  - systemd: state=restarted name=sshd
+    name: restart_sshd
+
+  tasks:
+  - file: state=directory path=/etc/yum.repos.d/bak
+  - shell: mv /etc/yum.repos.d/*.repo /etc/yum.repos.d/bak
+    ignore_errors: true
+
+  - yum_repository: gpgcheck=no enabled=yes baseurl={{ item.baseurl }} name={{ item.name }} description={{ item.name }}
+    with_items: '{{ enabled_repos }}'
+  - yum_repository: gpgcheck=no enabled=no baseurl={{ item.baseurl }} name={{ item.name }} description={{ item.name }}
+    with_items: '{{ disabled_repos }}'
+
+  - yum: state=present allowerasing=yes disablerepo=* enablerepo=EL9Rocky9BaseOS name=dnf-plugins-core
+  - command: dnf repolist
+
+  # EL9 container may need this rpm rebuild command
+  #- command: rpm --rebuilddb
+  - yum: state=present allowerasing=yes name=bash-completion,iputils,iproute,openssh-server,openssh-clients,NetworkManager,coreutils-common
+
+  - systemd: enabled=yes state=started name=NetworkManager
+    notify: restart_sshd
+
+  - lineinfile: state=present path=/etc/ssh/ssh_config.d/00-enterpriselinux.conf line='StrictHostKeyChecking no' create=true
+  - lineinfile: state=present path=/etc/ssh/sshd_config.d/00-enterpriselinux.conf line='PermitRootLogin prohibit-password' create=true
+  - lineinfile: state=present path=/etc/ssh/sshd_config.d/00-enterpriselinux.conf line='PasswordAuthentication no' create=true
+
+  - authorized_key: user=root state=present key="{{ item }}"
+    with_items:
+    - "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIXMEgrETPxr17AdWo3YSLLqiRlHC9hQ2+dfuJeR+imEUtSl0KUuW5KuhwUjNV78ZH4kywciapCRgziKeqKkTds="
+    - "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBBlpC4ImvIS6NryioaSB1gdHbCkYbV1AOv3FmhS1I/PFeplxl6dzdo8sddeuOOf6av+rPl5erCFsTExCs2h5kS8= root@i.10042008.xyz"
+
+  - lineinfile: state=present path=/etc/ssh/ssh_config.d/01-HostbasedAuthentication.conf line='HostbasedAuthentication yes' create=true
+  - lineinfile: state=present path=/etc/ssh/ssh_config line='EnableSSHKeysign yes' create=true
+  - lineinfile: state=present path=/etc/ssh/sshd_config.d/01-HostbasedAuthentication.conf line='HostbasedAuthentication yes' create=true
+  - lineinfile: state=present path=/etc/ssh/sshd_config.d/01-HostbasedAuthentication.conf line='UseDNS yes' create=true
+  - lineinfile: state=present path=/etc/ssh/sshd_config.d/01-HostbasedAuthentication.conf line='IgnoreUserKnownHosts yes' create=true
+  - systemd: enabled=yes state=started name=sshd
+
+  - yum: name=hostname
+  - command: hostname
+    register: shost
+  - lineinfile: state=present path=/home/root/etc/ssh/shosts.equiv line="{{ shost.stdout }}" create=true
+  - lineinfile: state=present path=/home/root/etc/ssh/shosts.equiv line="{{ shost.stdout }}" create=true
+
+  - shell: sort /home/root//etc/ssh/shosts.equiv > /etc/ssh/shosts.equiv
+  - shell: ssh-keyscan -t ecdsa -f /etc/ssh/shosts.equiv 2>/dev/null 1>/etc/ssh/ssh_known_hosts

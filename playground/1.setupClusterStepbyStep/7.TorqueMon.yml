@@ -1,0 +1,17 @@
+- hosts: all
+  gather_facts: false
+
+  vars:
+  - IPA_DOMAIN: pbs.toy
+  - TORQUE_SERVER: torque.{{ IPA_DOMAIN }}
+
+  tasks:
+  - yum: name=munge
+  - command: cp --archive --remove-destination /home/munge/munge.key /etc/munge
+  - systemd: enabled=yes state=started name=munge
+
+  - yum: name=torque,torque-mom
+  - copy: dest=/etc/torque/server_name content={{ TORQUE_SERVER }}
+  - copy: dest=/etc/torque/mom/config content="$pbsserver {{ TORQUE_SERVER }}"
+  - lineinfile: path=/etc/torque/mom/config line="$usecp *:/home /home"
+  - systemd: enabled=yes state=started name=pbs_mom

@@ -1,0 +1,82 @@
+- hosts: container_host
+  gather_facts: false
+
+  tasks:
+
+  - name: Create internal podman network for domain "{{ IPA_DOMAIN }}"
+    containers.podman.podman_network:
+      name: podman.{{ IPA_DOMAIN }}
+      recreate: true
+      force: true
+      ipv6: true
+      interface_name: "{{ INTERFACE_NAME }}"
+      subnet: "{{ SUBNET_PREFIX }}.0/24"
+      gateway: "{{ SUBNET_PREFIX }}.254"
+
+  - file: state=absent path=/data/volume/{{ IPA_DOMAIN }}
+  - file: state=directory path=/data/volume/{{ IPA_DOMAIN }}/freeipa
+  - file: state=directory path=/data/volume/{{ IPA_DOMAIN }}/home
+
+  - name: Create FreeIPA podman container for domain "{{ IPA_DOMAIN }}"
+    containers.podman.podman_container:
+      name: "ipa.{{ IPA_DOMAIN }}"
+      recreate: true
+      tty: true
+      interactive: true
+      rm: false
+      detach: true
+      network: "podman.{{ IPA_DOMAIN }}"
+      ip: "{{SUBNET_PREFIX}}.253"
+      hostname: "ipa.{{ IPA_DOMAIN }}"
+      volume:
+        - /data/volume/{{ IPA_DOMAIN }}/freeipa:/data
+      image: docker.io/freeipa/freeipa-server:fedora-40
+      command: --unattended --ds-password={{ DS_PASSWORD }} --admin-password={{ ADMIN_PASSWORD }} --realm={{ REALM }} --domain {{ IPA_DOMAIN }} --setup-dns --allow-zone-overlap --auto-reverse --forwarder 223.5.5.5 --forwarder 223.6.6.6
+      generate_systemd:
+        path: /tmp/
+        new: true
+        container_prefix: freeipa
+
+  - name: Create Login node container for domain "{{ IPA_DOMAIN }}"
+    containers.podman.podman_container:
+      name: "login.{{ IPA_DOMAIN }}"
+      hostname: "login.{{ IPA_DOMAIN }}"
+      publish: "{{ LOGIN_PUBLISH_SSH_PORT }}:22"
+      recreate: true
+      privileged: true
+      tty: true
+      interactive: true
+      rm: false
+      detach: true
+      network: "podman.{{ IPA_DOMAIN }}"
+      dns: "{{ SUBNET_PREFIX }}.253"
+      dns_search: "{{ IPA_DOMAIN }}"
+      volume:
+      - /data/volume/{{ IPA_DOMAIN }}/home:/home
+      image: rockylinux/rockylinux:9-ubi-init
+      generate_systemd:
+        path: /tmp/
+        new: true
+        container_prefix: ipaclients
+
+  - name: Create Compute nodes and TORQUE server podman containers for domain "{{ IPA_DOMAIN }}"
+    containers.podman.podman_container:
+      name: "{{ item.name }}.{{ IPA_DOMAIN }}"
+      hostname: "{{ item.name }}.{{ IPA_DOMAIN }}"
+      recreate: true
+      privileged: true
+      tty: true
+      interactive: true
+      rm: false
+      detach: true
+      network: "podman.{{ IPA_DOMAIN }}"
+      dns: "{{ SUBNET_PREFIX }}.253"
+      dns_search: "{{ IPA_DOMAIN }}"
+      volume:
+      - /data/volume/{{ IPA_DOMAIN }}/home:/home
+      image: rockylinux/rockylinux:9-ubi-init
+      generate_systemd:
+        path: /tmp/
+        new: true
+        container_prefix: ipaclients
+    with_items: "{{ container_nodes }}"

@@ -1,0 +1,20 @@
+# A qsub example for MPICH
+echo /usr/lib64/mpich/bin/mpirun -ppn 2 -env HYDRA_TOPO_DEBUG=1 hostname | qsub -l nodes=4 -j oe -N mpich
+
+# A qsub example for MVAPICH2
+echo /usr/lib64/mvapich2/bin/mpirun -ppn 2 hostname | qsub -l nodes=4 -j oe -N mvapich2
+
+# A qsub example for OpenMPI
+echo '/usr/lib64/openmpi/bin/mpirun -hostfile $PBS_NODEFILE -x FI_PROVIDER=^psm3 -map-by ppr:2:node -oversubscribe -report-bindings hostname' | qsub -l nodes=4 -j oe -N openmpi
+
+
+
+# A MPI Application qsub example for MPICH
+echo /usr/lib64/mpich/bin/mpirun -ppn 2 -env HYDRA_TOPO_DEBUG=1 /usr/lib64/mpich/bin/mpitests-osu_allreduce | qsub -l nodes=4 -j oe -N mpich
+
+# A MPI Application qsub example for MVAPICH2, while mvapich2 in this cluster cannot run without a RDMA network interface
+echo /usr/lib64/mvapich2/bin/mpirun -ppn 2 -env LD_LIBRARY_PATH /usr/lib64/mvapich2/lib /usr/lib64/mvapich2/bin/mpitests-osu_allreduce | qsub -l nodes=4 -j oe -N mvapich2
+
+# A MPI Application qsub example for OpenMPI
+echo '/usr/lib64/openmpi/bin/mpirun -hostfile $PBS_NODEFILE -x FI_PROVIDER=^psm3 -map-by ppr:2:node -oversubscribe -report-bindings /usr/lib64/openmpi/bin/mpitests-osu_allreduce' | qsub -l nodes=4 -j oe -N openmpi
+
